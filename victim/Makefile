@@ -1,9 +1,9 @@
 
 victim.o: victim.c
-	avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c -o victim.o victim.c
+	avr-gcc -Os -DF_CPU=8000000UL -mmcu=atmega328p -c -o victim.o victim.c
 
 aes.o: aes.c aes.h
-	avr-gcc -Os -DF_CPU=16000000UL -mmcu=atmega328p -c -o aes.o aes.c
+	avr-gcc -Os -DF_CPU=8000000UL -mmcu=atmega328p -c -o aes.o aes.c
 
 victim: victim.o aes.o
 	avr-gcc -mmcu=atmega328p victim.o aes.o -o victim
@@ -12,7 +12,11 @@ victim.hex: victim
 	avr-objcopy -O ihex -R .eeprom victim victim.hex
 
 flash: victim.hex
-	avrdude -F -V -c arduino -p m328p -P /dev/ttyUSB0 -b 57600 -U flash:w:victim.hex
+	# avrdude -F -V -c arduino -p m328p -P /dev/ttyUSB0 -b 57600 -U flash:w:victim.hex
+	# avrdude -F -V -c arduino -p m328p -P /dev/ttyACM0 -b 57600 -U flash:w:victim.hex
+	# avrdude -F -V -c arduino -p m328p -P /dev/ttyACM0 -b 115200 -U flash:w:victim.hex
+	# https://www.engbedded.com/fusecalc/
+	avrdude -F -V -c usbasp -p m328p  -b 115200 -U flash:w:victim.hex -U lfuse:w:0xe2:m -U hfuse:w:0xda:m -U efuse:w:0xff:m
 
 clean:
 	rm -f *.o
